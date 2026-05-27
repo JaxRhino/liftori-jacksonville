@@ -11,6 +11,7 @@ import { CaseDetail } from './pages/CaseDetail'
 import { ChatPage } from './pages/ChatPage'
 import { SuperAdminPanel } from './pages/SuperAdminPanel'
 import { PublicLanding } from './pages/PublicLanding'
+import { Transparency } from './pages/Transparency'
 import { Layout } from './components/Layout'
 
 function Loading() {
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/" element={<HomeRedirect />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/transparency" element={<Transparency />} />
         <Route path="/me" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenHome /></RoleGate>} />
         <Route path="/me/intake" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenIntake /></RoleGate>} />
         <Route path="/work" element={<RoleGate allow={['city_employee', 'super_admin']}><EmployeeDashboard /></RoleGate>} />

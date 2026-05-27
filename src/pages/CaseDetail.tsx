@@ -12,6 +12,7 @@ import { useRealtime } from '../lib/useRealtime'
 import { CaseChatTab } from '../components/CaseChatTab'
 import { VideoHuddleModal } from '../components/VideoHuddleModal'
 import { SimilarCasesCard } from '../components/SimilarCasesCard'
+import { CaseMap } from '../components/CaseMap'
 import type { ServiceRequestRow, Department, Profile, RequestStatus, RequestPriority } from '../lib/types'
 import { priorityTone, statusTone, relativeTime, slaState, STATUS_LABELS, PRIORITY_ORDER } from '../lib/types'
 
@@ -632,9 +633,8 @@ function LocationCard({ c }: { c: ServiceRequestRow }) {
           Open in maps <ArrowUpRight className="h-3 w-3" />
         </a>
       )}
-      {/* ArcGIS embed placeholder for Wave E */}
-      <div className="mt-3 h-32 rounded bg-gradient-to-br from-jax-blue/10 to-jax-navy/10 dark:from-jax-blue/20 dark:to-jax-navy/30 border border-dashed border-jax-blue/30 flex items-center justify-center text-xs text-jax-gray-3 italic">
-        ArcGIS feature layer embed — Wave E
+      <div className="mt-3">
+        <CaseMap lat={c.lat} lng={c.lng} address={c.service_address} priority={c.priority} height="220px" />
       </div>
     </div>
   )

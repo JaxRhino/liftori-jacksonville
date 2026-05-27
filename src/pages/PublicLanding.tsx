@@ -34,6 +34,9 @@ export function PublicLanding() {
               <Link to="/signup" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-jax-sky/50 hover:bg-jax-blue/20 transition">
                 Create a citizen account
               </Link>
+              <Link to="/transparency" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md border border-jax-sky/50 hover:bg-jax-blue/20 transition">
+                View transparency dashboard
+              </Link>
             </div>
             <p className="text-xs text-jax-sky/70 mt-6">
               Demo data only. Not a live City of Jacksonville system. Production deployment pending procurement award.
