@@ -11,6 +11,7 @@ import { useAuth } from '../lib/auth'
 import { useRealtime } from '../lib/useRealtime'
 import { CaseChatTab } from '../components/CaseChatTab'
 import { VideoHuddleModal } from '../components/VideoHuddleModal'
+import { SimilarCasesCard } from '../components/SimilarCasesCard'
 import type { ServiceRequestRow, Department, Profile, RequestStatus, RequestPriority } from '../lib/types'
 import { priorityTone, statusTone, relativeTime, slaState, STATUS_LABELS, PRIORITY_ORDER } from '../lib/types'
 
@@ -240,6 +241,7 @@ export function CaseDetail() {
         {/* LEFT — case info */}
         <div className="lg:col-span-2 space-y-4">
           <DescriptionCard c={c} />
+          <SimilarCasesCard caseId={c.id} />
           <CitizenCard c={c} />
           <LocationCard c={c} />
           <MetadataCard c={c} />
