@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Calendar, Trash2, Recycle, MapPin, Phone, FileText, MessageSquare, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 
@@ -53,9 +54,9 @@ export function CitizenHome() {
           <p className="text-sm text-jax-sky/90 mb-4">
             Tell me what's going on — a pothole, a missed pickup, a stray animal — and I'll route it to the right department.
           </p>
-          <button className="px-4 py-2 rounded-md bg-jax-gold text-jax-ink font-semibold hover:bg-jax-gold/90 transition text-sm">
+          <Link to="/me/intake" className="inline-block px-4 py-2 rounded-md bg-jax-gold text-jax-ink font-semibold hover:bg-jax-gold/90 transition text-sm">
             Open AI assistant
-          </button>
+          </Link>
         </div>
 
         <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg p-5">
@@ -76,9 +77,9 @@ export function CitizenHome() {
               <h3 className="font-semibold">My service requests</h3>
               <p className="text-xs text-jax-gray-4 dark:text-jax-gray-2">Track every interaction you've had with the city.</p>
             </div>
-            <button className="text-xs px-3 py-1.5 rounded-md bg-jax-blue text-jax-light hover:bg-jax-sky transition">
+            <Link to="/me/intake" className="inline-block text-xs px-3 py-1.5 rounded-md bg-jax-blue text-jax-light hover:bg-jax-sky transition">
               + New request
-            </button>
+            </Link>
           </div>
           <div className="divide-y divide-jax-gray-1 dark:divide-jax-blue/10">
             {loading && <div className="p-6 text-center text-sm text-jax-gray-3">Loading…</div>}

@@ -4,6 +4,7 @@ import { useAuth } from './lib/auth'
 import { Login } from './pages/Login'
 import { Signup } from './pages/Signup'
 import { CitizenHome } from './pages/CitizenHome'
+import { CitizenIntake } from './pages/CitizenIntake'
 import { EmployeeDashboard } from './pages/EmployeeDashboard'
 import { CasesList } from './pages/CasesList'
 import { CaseDetail } from './pages/CaseDetail'
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/me" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenHome /></RoleGate>} />
+        <Route path="/me/intake" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenIntake /></RoleGate>} />
         <Route path="/work" element={<RoleGate allow={['city_employee', 'super_admin']}><EmployeeDashboard /></RoleGate>} />
         <Route path="/work/cases" element={<RoleGate allow={['city_employee', 'super_admin']}><CasesList /></RoleGate>} />
         <Route path="/work/chat" element={<RoleGate allow={['city_employee', 'super_admin']}><ChatPage /></RoleGate>} />
