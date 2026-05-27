@@ -1,12 +1,16 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { LogOut, User } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import { usePresence } from '../lib/usePresence'
 import { DarkModeToggle } from './DarkModeToggle'
 import { JaxSeal } from './JaxSeal'
 
 export function Layout() {
   const { user, profile, role, signOut } = useAuth()
   const nav = useNavigate()
+
+  // Keep this agent's last_seen_at fresh while any page is mounted.
+  usePresence()
 
   async function handleSignOut() {
     await signOut()

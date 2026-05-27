@@ -4,6 +4,7 @@ import { Activity, AlertTriangle, ArrowRight, Bell, CheckCircle, Clock, Inbox, M
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
+import { OnlineAgentsCard } from '../components/OnlineAgentsCard'
 import type { ServiceRequestRow, Department } from '../lib/types'
 import { priorityTone, statusTone, relativeTime, slaState } from '../lib/types'
 
@@ -147,6 +148,7 @@ export function EmployeeDashboard() {
         </div>
 
         <div className="space-y-6">
+          <OnlineAgentsCard />
           <div className="bg-gradient-to-br from-jax-blue to-jax-navy text-jax-light rounded-lg p-5">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-jax-sky mb-2">
               <MessageSquare className="h-3.5 w-3.5" /> Wave C preview
