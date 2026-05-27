@@ -7,6 +7,7 @@ import { CitizenHome } from './pages/CitizenHome'
 import { EmployeeDashboard } from './pages/EmployeeDashboard'
 import { CasesList } from './pages/CasesList'
 import { CaseDetail } from './pages/CaseDetail'
+import { ChatPage } from './pages/ChatPage'
 import { SuperAdminPanel } from './pages/SuperAdminPanel'
 import { PublicLanding } from './pages/PublicLanding'
 import { Layout } from './components/Layout'
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/me" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenHome /></RoleGate>} />
         <Route path="/work" element={<RoleGate allow={['city_employee', 'super_admin']}><EmployeeDashboard /></RoleGate>} />
         <Route path="/work/cases" element={<RoleGate allow={['city_employee', 'super_admin']}><CasesList /></RoleGate>} />
+        <Route path="/work/chat" element={<RoleGate allow={['city_employee', 'super_admin']}><ChatPage /></RoleGate>} />
         <Route path="/work/cases/:id" element={<RoleGate allow={['city_employee', 'super_admin']}><CaseDetail /></RoleGate>} />
         <Route path="/admin" element={<RoleGate allow={['super_admin']}><SuperAdminPanel /></RoleGate>} />
         <Route path="*" element={<Navigate to="/" replace />} />
