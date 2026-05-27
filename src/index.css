@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Liftori-Jacksonville theme tokens — navy primary, crimson accent */
+@theme {
+  --color-jax-navy: #0B2D55;
+  --color-jax-navy-deep: #061831;
+  --color-jax-blue: #1E5BC6;
+  --color-jax-sky: #4A8BE0;
+  --color-jax-red: #B91C1C;
+  --color-jax-gold: #D4A437;
+  --color-jax-light: #F4F6F9;
+  --color-jax-ink: #0F1B2D;
+  --color-jax-gray-1: #E5E9F0;
+  --color-jax-gray-2: #C0C8D6;
+  --color-jax-gray-3: #8794A8;
+  --color-jax-gray-4: #4B5668;
+  --color-jax-success: #047857;
+  --color-jax-warn: #B45309;
+  --color-jax-danger: #B91C1C;
+  --font-display: "Inter", "DM Sans", system-ui, sans-serif;
+  --font-body: "Inter", "DM Sans", system-ui, sans-serif;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+html, body, #root {
+  font-family: var(--font-body);
+  font-feature-settings: "cv11", "ss01", "ss03";
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-jax-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-jax-gray-2); border-radius: 8px; }
+.dark ::-webkit-scrollbar-thumb { background: var(--color-jax-gray-4); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-jax-gray-3); }
