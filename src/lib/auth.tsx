@@ -21,13 +21,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [bootstrapped, setBootstrapped] = useState(false)
 
+  // Boot — resolve initial session. Only after this completes do we know whether
+  // there is a user to fetch a profile for.
   useEffect(() => {
     let mounted = true
     supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return
       setSession(data.session)
       setUser(data.session?.user ?? null)
+      setBootstrapped(true)
+      // If there is no user, we are done loading. If there IS a user, the profile
+      // effect below will take over and clear loading once the profile is fetched.
+      if (!data.session?.user) setLoading(false)
     })
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
       setSession(sess)
@@ -36,9 +43,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { mounted = false; sub.subscription.unsubscribe() }
   }, [])
 
+  // Profile fetch — runs whenever user changes (sign in / sign out / refresh).
   useEffect(() => {
     let mounted = true
-    if (!user) { setProfile(null); setLoading(false); return }
+    if (!user) {
+      setProfile(null)
+      // Don't touch loading here BEFORE getSession completes — that's the bug
+      // that bounced authenticated users to /login on hard refresh.
+      if (bootstrapped) setLoading(false)
+      return
+    }
     setLoading(true)
     ;(async () => {
       const { data, error } = await supabase
@@ -52,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })()
     return () => { mounted = false }
-  }, [user])
+  }, [user, bootstrapped])
 
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
