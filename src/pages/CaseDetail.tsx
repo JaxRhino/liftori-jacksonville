@@ -155,6 +155,29 @@ export function CaseDetail() {
     await logActivity('video_started', { room: `liftori-jax-case-${c.id}` })
   }
 
+  async function draftReply(tone: 'professional' | 'warm' | 'concise' = 'professional'): Promise<string> {
+    if (!c) return ''
+    const { data: sess } = await supabase.auth.getSession()
+    const token = sess.session?.access_token
+    if (!token) return ''
+    const fnUrl = `https://gnacmyygtmefgojwngpx.supabase.co/functions/v1/draft-reply`
+    const resp = await fetch(fnUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ case_id: c.id, tone }),
+    })
+    if (!resp.ok) {
+      console.warn('draft-reply error', resp.status, await resp.text().catch(() => ''))
+      return ''
+    }
+    const { draft } = await resp.json() as { draft: string }
+    await logActivity('ai_suggested', { kind: 'reply_draft', tone })
+    return draft
+  }
+
   async function postComment(body: string, visibility: 'public' | 'internal') {
     if (!c || !profile) return
     const { error } = await supabase.from('request_comments').insert({
@@ -228,6 +251,7 @@ export function CaseDetail() {
             tab={tab} setTab={setTab}
             c={c} comments={comments} activity={activity}
             onComment={postComment}
+            onDraftReply={draftReply}
           />
         </div>
       </div>
@@ -648,12 +672,13 @@ function Field({ label, value, icon: Icon }: { label: string; value: string; ico
 // RIGHT-COLUMN TABS PANEL
 // ─────────────────────────────────────────────────────────────────────
 function TabsPanel({
-  tab, setTab, c, comments, activity, onComment,
+  tab, setTab, c, comments, activity, onComment, onDraftReply,
 }: {
   tab: TabKey; setTab: (t: TabKey) => void
   c: ServiceRequestRow
   comments: RequestComment[]; activity: RequestActivity[]
   onComment: (body: string, visibility: 'public' | 'internal') => Promise<void>
+  onDraftReply: (tone?: 'professional' | 'warm' | 'concise') => Promise<string>
 }) {
   const tabs: Array<{ key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; count: number }> = [
     { key: 'activity', label: 'Activity', icon: Activity,      count: activity.length },
@@ -698,6 +723,7 @@ function TabsPanel({
           placeholder={tab === 'comments' ? `Reply to ${c.citizen?.display_name || 'the citizen'}…` : 'Internal note (staff only)…'}
           onSubmit={(body) => onComment(body, tab === 'comments' ? 'public' : 'internal')}
           tone={tab === 'comments' ? 'public' : 'internal'}
+          onDraftReply={tab === 'comments' ? onDraftReply : undefined}
         />
       )}
     </div>
@@ -769,27 +795,56 @@ function CommentList({ comments, empty }: { comments: RequestComment[]; empty: s
   )
 }
 
-function ComposeBox({ placeholder, onSubmit, tone }: { placeholder: string; onSubmit: (body: string) => Promise<void>; tone: 'public' | 'internal' }) {
+function ComposeBox({ placeholder, onSubmit, tone, onDraftReply }: {
+  placeholder: string
+  onSubmit: (body: string) => Promise<void>
+  tone: 'public' | 'internal'
+  onDraftReply?: (tone?: 'professional' | 'warm' | 'concise') => Promise<string>
+}) {
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
+  const [drafting, setDrafting] = useState(false)
+
   async function send() {
     if (!text.trim() || sending) return
     setSending(true); await onSubmit(text.trim()); setText(''); setSending(false)
   }
+
+  async function draft() {
+    if (!onDraftReply || drafting) return
+    setDrafting(true)
+    const out = await onDraftReply('professional')
+    if (out) setText(out)
+    setDrafting(false)
+  }
+
   return (
     <div className={`border-t border-jax-gray-1 dark:border-jax-blue/20 p-3 ${tone === 'internal' ? 'bg-jax-warn/5' : ''}`}>
       <textarea
         value={text}
         onChange={e => setText(e.target.value)}
         placeholder={placeholder}
-        rows={2}
+        rows={3}
         className="w-full text-sm bg-transparent resize-none outline-none placeholder:text-jax-gray-3"
         onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send() }}
       />
-      <div className="flex items-center justify-between mt-2">
-        <div className="text-[10px] text-jax-gray-3">
-          {tone === 'internal' ? 'Staff-only · not visible to citizen' : 'Public · visible in citizen portal'}
-          <span className="ml-2">⌘+Enter to send</span>
+      <div className="flex items-center justify-between mt-2 gap-2">
+        <div className="flex items-center gap-2">
+          {onDraftReply && (
+            <button
+              onClick={draft}
+              disabled={drafting}
+              title="Draft a reply with AI"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md border border-jax-blue/30 text-jax-blue hover:bg-jax-blue/10 disabled:opacity-50 transition"
+            >
+              {drafting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {drafting ? 'Drafting...' : 'Draft with AI'}
+            </button>
+          )}
+          <span className="text-[10px] text-jax-gray-3">
+            {tone === 'internal' ? 'Staff-only · not visible to citizen' : 'Public · visible in citizen portal'}
+            <span className="ml-2">⌘+Enter to send</span>
+          </span>
         </div>
         <button
           onClick={send}
