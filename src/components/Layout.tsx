@@ -4,12 +4,11 @@ import { useAuth } from '../lib/auth'
 import { usePresence } from '../lib/usePresence'
 import { DarkModeToggle } from './DarkModeToggle'
 import { JaxSeal } from './JaxSeal'
+import { CommandPalette } from './CommandPalette'
 
 export function Layout() {
   const { user, profile, role, signOut } = useAuth()
   const nav = useNavigate()
-
-  // Keep this agent's last_seen_at fresh while any page is mounted.
   usePresence()
 
   async function handleSignOut() {
@@ -66,6 +65,9 @@ export function Layout() {
           City of Jacksonville Citizen Services · 630-CITY (904-630-2489) · Demo build by Liftori, LLC
         </div>
       </footer>
+
+      {/* Global command palette — listens for ⌘K from anywhere */}
+      <CommandPalette />
     </div>
   )
 }

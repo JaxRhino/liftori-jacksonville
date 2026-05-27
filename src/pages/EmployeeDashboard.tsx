@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { OnlineAgentsCard } from '../components/OnlineAgentsCard'
+import { useCommandPalette } from '../components/CommandPalette'
 import type { ServiceRequestRow, Department } from '../lib/types'
 import { priorityTone, statusTone, relativeTime, slaState } from '../lib/types'
 
@@ -12,6 +13,7 @@ interface QueueStats { open: number; due_today: number; breached: number; resolv
 
 export function EmployeeDashboard() {
   const { profile } = useAuth()
+  const palette = useCommandPalette()
   const [stats, setStats] = useState<QueueStats>({ open: 0, due_today: 0, breached: 0, resolved_today: 0, agents_online: 0 })
   const [departments, setDepartments] = useState<Department[]>([])
   const [topQueue, setTopQueue] = useState<ServiceRequestRow[]>([])
@@ -86,7 +88,7 @@ export function EmployeeDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-jax-gray-2 dark:border-jax-gray-4/40 hover:bg-jax-blue/10 transition" title="Cmd+K to open">
+          <button onClick={palette.open} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md border border-jax-gray-2 dark:border-jax-gray-4/40 hover:bg-jax-blue/10 transition" title="Press Cmd+K (or Ctrl+K) to open">
             <Search className="h-4 w-4" /> <span className="hidden sm:inline">Search any case</span>
             <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] rounded bg-jax-gray-1 dark:bg-jax-navy-deep border border-jax-gray-2 dark:border-jax-blue/30">⌘K</kbd>
           </button>
