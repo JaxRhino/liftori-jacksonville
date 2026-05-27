@@ -127,13 +127,14 @@ export function CaseChatTab({ caseId, caseSubject }: { caseId: string; caseSubje
           <div className="text-xs font-semibold truncate">Case channel</div>
           <div className="text-[10px] text-jax-gray-3 truncate">{caseSubject}</div>
         </div>
-        <button
-          title="Start video huddle — Wave C.3"
-          className="p-1.5 rounded-md hover:bg-jax-blue/10 transition opacity-50 cursor-not-allowed"
-          disabled
+        <a
+          href={`https://meet.jit.si/${encodeURIComponent(`liftori-jax-case-${caseId}`)}`}
+          target="_blank" rel="noopener"
+          title="Open the case video huddle in a new tab"
+          className="p-1.5 rounded-md hover:bg-jax-blue/10 transition text-jax-success"
         >
           <Video className="h-3.5 w-3.5" />
-        </button>
+        </a>
       </div>
 
       {/* Messages */}

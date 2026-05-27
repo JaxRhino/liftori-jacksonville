@@ -3,13 +3,14 @@ import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft, ArrowUpRight, Bookmark, Check, ChevronDown,
   Clock, FileText, MapPin, MessageSquare, Phone, Send,
-  Sparkles, Tag, User, AlertTriangle, Activity, Lock,
+  Sparkles, Tag, User, AlertTriangle, Activity, Lock, Video,
   Mail, Hash, Pencil, Loader2, Building2, Calendar, ShieldAlert,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { useRealtime } from '../lib/useRealtime'
 import { CaseChatTab } from '../components/CaseChatTab'
+import { VideoHuddleModal } from '../components/VideoHuddleModal'
 import type { ServiceRequestRow, Department, Profile, RequestStatus, RequestPriority } from '../lib/types'
 import { priorityTone, statusTone, relativeTime, slaState, STATUS_LABELS, PRIORITY_ORDER } from '../lib/types'
 
@@ -134,6 +135,26 @@ export function CaseDetail() {
     setBusy(null)
   }
 
+  const [huddleOpen, setHuddleOpen] = useState(false)
+
+  async function startHuddle() {
+    if (!c || !profile) return
+    setHuddleOpen(true)
+    // Drop a join-link in the case chat so other agents can follow
+    try {
+      const { data: chId } = await supabase.rpc('find_or_create_case_channel', { p_case_id: c.id })
+      if (chId) {
+        const url = `https://meet.jit.si/${encodeURIComponent(`liftori-jax-case-${c.id}`)}`
+        await supabase.from('agent_chat_messages').insert({
+          channel_id: chId as string,
+          sender_id: profile.id,
+          body: `🎥 Started a video huddle — join here: ${url}`,
+        })
+      }
+    } catch (e) { console.warn('huddle chat post failed', e) }
+    await logActivity('video_started', { room: `liftori-jax-case-${c.id}` })
+  }
+
   async function postComment(body: string, visibility: 'public' | 'internal') {
     if (!c || !profile) return
     const { error } = await supabase.from('request_comments').insert({
@@ -177,8 +198,19 @@ export function CaseDetail() {
         onStatus={updateStatus} onPriority={updatePriority}
         onAssignee={updateAssignee} onDepartment={updateDepartment}
         onSubject={updateSubject}
+        onStartHuddle={startHuddle}
         busy={busy}
       />
+
+      {huddleOpen && profile && (
+        <VideoHuddleModal
+          room={`liftori-jax-case-${c.id}`}
+          displayName={profile.display_name || profile.full_name || 'Agent'}
+          subject={c.subject}
+          caseTicket={c.ticket_number}
+          onLeave={() => setHuddleOpen(false)}
+        />
+      )}
 
       {/* Split-pane body */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
@@ -208,7 +240,7 @@ export function CaseDetail() {
 // ─────────────────────────────────────────────────────────────────────
 function CaseHeader({
   c, departments, agents,
-  onStatus, onPriority, onAssignee, onDepartment, onSubject, busy,
+  onStatus, onPriority, onAssignee, onDepartment, onSubject, onStartHuddle, busy,
 }: {
   c: ServiceRequestRow
   departments: Department[]
@@ -218,6 +250,7 @@ function CaseHeader({
   onAssignee: (id: string | null) => Promise<void>
   onDepartment: (id: string) => Promise<void>
   onSubject: (s: string) => Promise<void>
+  onStartHuddle: () => void
   busy: string | null
 }) {
   const [editing, setEditing] = useState(false)
@@ -247,7 +280,14 @@ function CaseHeader({
             <Clock className="h-3 w-3" /> Due soon
           </span>
         )}
-        <span className="text-xs text-jax-gray-3 ml-auto font-mono">{c.ticket_number}</span>
+        <button
+          onClick={onStartHuddle}
+          className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded bg-jax-success/15 text-jax-success hover:bg-jax-success/25 transition"
+          title="Start a video huddle for this case"
+        >
+          <Video className="h-3 w-3" /> Start huddle
+        </button>
+        <span className="text-xs text-jax-gray-3 font-mono">{c.ticket_number}</span>
       </div>
 
       {/* Subject — inline editable */}
