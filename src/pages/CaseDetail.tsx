@@ -9,6 +9,7 @@ import {
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { useRealtime } from '../lib/useRealtime'
+import { CaseChatTab } from '../components/CaseChatTab'
 import type { ServiceRequestRow, Department, Profile, RequestStatus, RequestPriority } from '../lib/types'
 import { priorityTone, statusTone, relativeTime, slaState, STATUS_LABELS, PRIORITY_ORDER } from '../lib/types'
 
@@ -31,7 +32,7 @@ interface RequestActivity {
   created_at: string
 }
 
-type TabKey = 'activity' | 'comments' | 'internal' | 'files'
+type TabKey = 'activity' | 'chat' | 'comments' | 'internal' | 'files'
 
 export function CaseDetail() {
   const { id } = useParams<{ id: string }>()
@@ -616,7 +617,8 @@ function TabsPanel({
 }) {
   const tabs: Array<{ key: TabKey; label: string; icon: React.ComponentType<{ className?: string }>; count: number }> = [
     { key: 'activity', label: 'Activity', icon: Activity,      count: activity.length },
-    { key: 'comments', label: 'Comments', icon: MessageSquare, count: comments.filter(c => c.visibility === 'public').length },
+    { key: 'chat',     label: 'Chat',     icon: MessageSquare, count: 0 },
+    { key: 'comments', label: 'Comments', icon: User,          count: comments.filter(c => c.visibility === 'public').length },
     { key: 'internal', label: 'Internal', icon: Lock,          count: comments.filter(c => c.visibility === 'internal').length },
     { key: 'files',    label: 'Files',    icon: FileText,      count: 0 },
   ]
@@ -644,6 +646,7 @@ function TabsPanel({
 
       <div className="flex-1 overflow-y-auto p-4">
         {tab === 'activity' && <ActivityList activity={activity} />}
+        {tab === 'chat'     && <CaseChatTab caseId={c.id} caseSubject={c.subject} />}
         {tab === 'comments' && <CommentList comments={comments.filter(co => co.visibility === 'public')} empty="No public comments yet. Reply to the citizen below." />}
         {tab === 'internal' && <CommentList comments={comments.filter(co => co.visibility === 'internal')} empty="No internal notes yet. Add staff-only context below." />}
         {tab === 'files'    && <FilesPlaceholder />}
