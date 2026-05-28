@@ -9,10 +9,16 @@ import { EmployeeDashboard } from './pages/EmployeeDashboard'
 import { CasesList } from './pages/CasesList'
 import { CaseDetail } from './pages/CaseDetail'
 import { ChatPage } from './pages/ChatPage'
+import { CalendarPage } from './pages/workspace/CalendarPage'
+import { NotesPage } from './pages/workspace/NotesPage'
+import { TasksPage } from './pages/workspace/TasksPage'
+import { EmailPage } from './pages/workspace/EmailPage'
+import { MeetPage } from './pages/workspace/MeetPage'
 import { SuperAdminPanel } from './pages/SuperAdminPanel'
 import { PublicLanding } from './pages/PublicLanding'
 import { Transparency } from './pages/Transparency'
 import { Layout } from './components/Layout'
+import { WorkspaceLayout } from './components/WorkspaceLayout'
 
 function Loading() {
   return (
@@ -49,10 +55,17 @@ export default function App() {
         <Route path="/transparency" element={<Transparency />} />
         <Route path="/me" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenHome /></RoleGate>} />
         <Route path="/me/intake" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenIntake /></RoleGate>} />
-        <Route path="/work" element={<RoleGate allow={['city_employee', 'super_admin']}><EmployeeDashboard /></RoleGate>} />
-        <Route path="/work/cases" element={<RoleGate allow={['city_employee', 'super_admin']}><CasesList /></RoleGate>} />
-        <Route path="/work/chat" element={<RoleGate allow={['city_employee', 'super_admin']}><ChatPage /></RoleGate>} />
-        <Route path="/work/cases/:id" element={<RoleGate allow={['city_employee', 'super_admin']}><CaseDetail /></RoleGate>} />
+        <Route element={<RoleGate allow={['city_employee', 'super_admin']}><WorkspaceLayout /></RoleGate>}>
+          <Route path="/work" element={<EmployeeDashboard />} />
+          <Route path="/work/cases" element={<CasesList />} />
+          <Route path="/work/cases/:id" element={<CaseDetail />} />
+          <Route path="/work/chat" element={<ChatPage />} />
+          <Route path="/work/calendar" element={<CalendarPage />} />
+          <Route path="/work/notes" element={<NotesPage />} />
+          <Route path="/work/tasks" element={<TasksPage />} />
+          <Route path="/work/email" element={<EmailPage />} />
+          <Route path="/work/meet" element={<MeetPage />} />
+        </Route>
         <Route path="/admin" element={<RoleGate allow={['super_admin']}><SuperAdminPanel /></RoleGate>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
