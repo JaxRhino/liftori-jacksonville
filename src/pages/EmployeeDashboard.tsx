@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Activity, AlertTriangle, ArrowRight, Bell, CheckCircle, Clock, Eye,
+  Activity, AlertTriangle, ArrowRight, CheckCircle, Clock, Eye,
   Inbox, MapPin, MessageSquare, Search, Sparkles, Users,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
@@ -125,10 +125,7 @@ export function EmployeeDashboard() {
             <Search className="h-4 w-4" /> <span className="hidden sm:inline">Search any case</span>
             <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] rounded bg-jax-gray-1 dark:bg-jax-navy-deep border border-jax-gray-2 dark:border-jax-blue/30">⌘K</kbd>
           </button>
-          <button className="relative p-2 rounded-md border border-jax-gray-2 dark:border-jax-gray-4/40 hover:bg-jax-blue/10 transition" aria-label="Notifications">
-            <Bell className="h-4 w-4" />
-            {stats.breached > 0 && <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-jax-red" />}
-          </button>
+
         </div>
       </div>
 

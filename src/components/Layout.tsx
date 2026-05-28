@@ -5,6 +5,7 @@ import { usePresence } from '../lib/usePresence'
 import { DarkModeToggle } from './DarkModeToggle'
 import { JaxSeal } from './JaxSeal'
 import { CommandPalette } from './CommandPalette'
+import { NotificationsBell } from './NotificationsBell'
 
 export function Layout() {
   const { user, profile, role, signOut } = useAuth()
@@ -30,6 +31,7 @@ export function Layout() {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <DarkModeToggle />
+            {user && <NotificationsBell />}
             {user ? (
               <>
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-jax-navy-deep/50 border border-jax-blue/30">
