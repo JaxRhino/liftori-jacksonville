@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
+import { AttachmentsPanel } from '../../components/AttachmentsPanel'
 import { useRealtime } from '../../lib/useRealtime'
 
 type TaskStatus = 'todo' | 'doing' | 'blocked' | 'done' | 'cancelled'
@@ -467,6 +468,12 @@ function TaskModal({ mode, task, ownerId, profiles, cases, onClose, onSaved }: {
                 placeholder="add tag…" className="flex-1 min-w-[80px] bg-transparent outline-none text-xs placeholder:text-jax-gray-3" />
             </div>
           </Field>
+
+          {mode === 'edit' && task && (
+            <Field label="Attachments">
+              <AttachmentsPanel parentType="task" parentId={task.id} variant="compact" />
+            </Field>
+          )}
 
           {err && <div className="px-3 py-2 rounded-md bg-jax-danger/10 border border-jax-danger/30 text-jax-danger text-xs">{err}</div>}
         </div>

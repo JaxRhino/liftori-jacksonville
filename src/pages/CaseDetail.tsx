@@ -12,6 +12,7 @@ import { useRealtime } from '../lib/useRealtime'
 import { CaseChatTab } from '../components/CaseChatTab'
 import { VideoHuddleModal } from '../components/VideoHuddleModal'
 import { SimilarCasesCard } from '../components/SimilarCasesCard'
+import { AttachmentsPanel } from '../components/AttachmentsPanel'
 import { CaseMap } from '../components/CaseMap'
 import type { ServiceRequestRow, Department, Profile, RequestStatus, RequestPriority } from '../lib/types'
 import { priorityTone, statusTone, relativeTime, slaState, STATUS_LABELS, PRIORITY_ORDER } from '../lib/types'
@@ -716,7 +717,7 @@ function TabsPanel({
         {tab === 'chat'     && <CaseChatTab caseId={c.id} caseSubject={c.subject} />}
         {tab === 'comments' && <CommentList comments={comments.filter(co => co.visibility === 'public')} empty="No public comments yet. Reply to the citizen below." />}
         {tab === 'internal' && <CommentList comments={comments.filter(co => co.visibility === 'internal')} empty="No internal notes yet. Add staff-only context below." />}
-        {tab === 'files'    && <FilesPlaceholder />}
+        {tab === 'files'    && <AttachmentsPanel parentType="case" parentId={c.id} className="p-2" />}
       </div>
 
       {(tab === 'comments' || tab === 'internal') && (
@@ -860,12 +861,3 @@ function ComposeBox({ placeholder, onSubmit, tone, onDraftReply }: {
   )
 }
 
-function FilesPlaceholder() {
-  return (
-    <div className="text-center py-12">
-      <FileText className="h-10 w-10 text-jax-gray-3 mx-auto mb-2" />
-      <p className="text-sm text-jax-gray-4 dark:text-jax-gray-2">Attachments arrive in Wave C.</p>
-      <p className="text-xs text-jax-gray-3 mt-1 italic">Photo uploads from citizens · field-crew evidence · permit docs.</p>
-    </div>
-  )
-}

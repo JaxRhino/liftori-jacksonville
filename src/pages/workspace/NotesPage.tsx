@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
+import { AttachmentsPanel } from '../../components/AttachmentsPanel'
 import { useRealtime } from '../../lib/useRealtime'
 import { relativeTime } from '../../lib/types'
 
@@ -337,6 +338,12 @@ function NoteEditor({ note, agents, ownerId, onDeleted }: {
           {saving ? 'Saving…' : savedAt ? `Saved ${relativeTime(savedAt.toISOString())}` : `Updated ${relativeTime(note.updated_at)}`}
         </div>
       </div>
+      {note.id && (
+        <div className="px-5 py-3 border-t border-jax-gray-1 dark:border-jax-blue/20">
+          <div className="text-[10px] uppercase tracking-widest text-jax-gray-3 mb-1.5">Attachments</div>
+          <AttachmentsPanel parentType="note" parentId={note.id} variant="compact" />
+        </div>
+      )}
     </div>
   )
 }
