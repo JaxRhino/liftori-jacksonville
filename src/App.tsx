@@ -17,6 +17,7 @@ import { MeetPage } from './pages/workspace/MeetPage'
 import { SuperAdminPanel } from './pages/SuperAdminPanel'
 import { PublicLanding } from './pages/PublicLanding'
 import { Transparency } from './pages/Transparency'
+import { MeetInvite } from './pages/MeetInvite'
 import { Layout } from './components/Layout'
 import { WorkspaceLayout } from './components/WorkspaceLayout'
 
@@ -53,6 +54,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/transparency" element={<Transparency />} />
+        <Route path="/meet/:token" element={<MeetInvite />} />
         <Route path="/me" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenHome /></RoleGate>} />
         <Route path="/me/intake" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenIntake /></RoleGate>} />
         <Route element={<RoleGate allow={['city_employee', 'super_admin']}><WorkspaceLayout /></RoleGate>}>
