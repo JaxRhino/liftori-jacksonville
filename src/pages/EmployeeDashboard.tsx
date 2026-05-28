@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Activity, AlertTriangle, ArrowRight, Bell, CheckCircle, Clock, Inbox, MessageSquare, Search, Sparkles, Users } from 'lucide-react'
+import {
+  Activity, AlertTriangle, ArrowRight, Bell, CheckCircle, Clock, Eye,
+  Inbox, MapPin, MessageSquare, Search, Sparkles, Users,
+} from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
@@ -11,12 +14,23 @@ import { priorityTone, statusTone, relativeTime, slaState } from '../lib/types'
 
 interface QueueStats { open: number; due_today: number; breached: number; resolved_today: number; agents_online: number }
 
+interface RecentActivity {
+  id: string
+  request_id: string
+  kind: string
+  actor_name: string | null
+  created_at: string
+  case_subject?: string
+  case_ticket?: string
+}
+
 export function EmployeeDashboard() {
   const { profile } = useAuth()
   const palette = useCommandPalette()
   const [stats, setStats] = useState<QueueStats>({ open: 0, due_today: 0, breached: 0, resolved_today: 0, agents_online: 0 })
   const [departments, setDepartments] = useState<Department[]>([])
   const [topQueue, setTopQueue] = useState<ServiceRequestRow[]>([])
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
 
@@ -24,15 +38,15 @@ export function EmployeeDashboard() {
     const startOfDay = new Date(); startOfDay.setHours(0,0,0,0)
     const endOfDay = new Date(); endOfDay.setHours(23,59,59,999)
 
-    const [openR, dueR, breachR, resR, agentsR, deptsR, queueR] = await Promise.all([
+    const [openR, dueR, breachR, resR, agentsR, deptsR, queueR, actR] = await Promise.all([
       supabase.from('service_requests').select('id', { count: 'exact', head: true }).in('status', ['new','triaged','assigned','in_progress']),
       supabase.from('service_requests').select('id', { count: 'exact', head: true }).in('status', ['new','triaged','assigned','in_progress']).lte('sla_due_at', endOfDay.toISOString()),
       supabase.from('service_requests').select('id', { count: 'exact', head: true }).in('status', ['new','triaged','assigned','in_progress']).lt('sla_due_at', new Date().toISOString()),
       supabase.from('service_requests').select('id', { count: 'exact', head: true }).eq('status','resolved').gte('updated_at', startOfDay.toISOString()),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role','city_employee').eq('status','online'),
       supabase.from('departments').select('*').eq('is_active', true).order('sort_order'),
-      supabase
-        .from('service_requests')
+      // Top open queue: simple created_at order, client-side resort by priority+SLA
+      supabase.from('service_requests')
         .select(`
           id, ticket_number, subject, status, priority, source, citizen_name,
           service_address, council_district, sla_due_at, created_at, updated_at, tags, ai_summary,
@@ -41,9 +55,13 @@ export function EmployeeDashboard() {
           citizen:profiles!service_requests_citizen_id_fkey(id, full_name, display_name, email, phone)
         `)
         .in('status', ['new','triaged','assigned','in_progress'])
-        .order('priority', { ascending: true })   // emergency < urgent < high < normal < low alphabetically? we'll re-sort client-side
-        .order('sla_due_at', { ascending: true, nullsFirst: false })
-        .limit(6),
+        .order('created_at', { ascending: false })
+        .limit(20),
+      // Recent activity across all cases
+      supabase.from('request_activity')
+        .select('id, request_id, kind, actor_name, created_at')
+        .order('created_at', { ascending: false })
+        .limit(12),
     ])
 
     setStats({
@@ -54,7 +72,7 @@ export function EmployeeDashboard() {
       agents_online: agentsR.count ?? 0,
     })
     setDepartments(((deptsR.data as Department[]) ?? []))
-    // Sort top queue by priority weight, then SLA risk
+
     const weight: Record<string, number> = { emergency: 0, urgent: 1, high: 2, normal: 3, low: 4 }
     const sorted = ((queueR.data as unknown as ServiceRequestRow[]) ?? []).slice().sort((a, b) => {
       const aw = weight[a.priority]; const bw = weight[b.priority]
@@ -64,15 +82,27 @@ export function EmployeeDashboard() {
       return ad - bd
     })
     setTopQueue(sorted.slice(0, 6))
+
+    // Enrich activity with case subject + ticket
+    const rawAct = ((actR.data as Array<{ id: string; request_id: string; kind: string; actor_name: string | null; created_at: string }>) ?? [])
+    if (rawAct.length > 0) {
+      const ids = Array.from(new Set(rawAct.map(x => x.request_id)))
+      const { data: subs } = await supabase.from('service_requests').select('id, ticket_number, subject').in('id', ids)
+      const lookup: Record<string, { ticket_number: string; subject: string }> = {}
+      for (const s of ((subs as Array<{ id: string; ticket_number: string; subject: string }>) ?? [])) lookup[s.id] = s
+      setRecentActivity(rawAct.map(a => ({ ...a, case_subject: lookup[a.request_id]?.subject, case_ticket: lookup[a.request_id]?.ticket_number })))
+    } else {
+      setRecentActivity([])
+    }
+
     setLoading(false)
     setLastUpdated(new Date())
   }, [])
 
   useEffect(() => { loadAll() }, [loadAll])
-
-  // Refresh on Realtime updates
   useRealtime('service_requests', loadAll)
   useRealtime('profiles', loadAll)
+  useRealtime('request_activity', loadAll)
 
   const displayName = profile?.display_name || profile?.full_name || profile?.email
 
@@ -115,7 +145,7 @@ export function EmployeeDashboard() {
             <div className="flex items-center justify-between px-5 py-4 border-b border-jax-gray-1 dark:border-jax-blue/20">
               <div>
                 <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-jax-blue" /> AI-prioritized queue</h3>
-                <p className="text-xs text-jax-gray-4 dark:text-jax-gray-2">Top {topQueue.length} of {stats.open} open cases, sorted by priority and SLA risk.</p>
+                <p className="text-xs text-jax-gray-4 dark:text-jax-gray-2">Top {topQueue.length} of {stats.open} open cases, ranked by priority + SLA risk.</p>
               </div>
               <Link to="/work/cases" className="text-xs font-medium text-jax-blue hover:text-jax-sky flex items-center gap-1">
                 View all <ArrowRight className="h-3 w-3" />
@@ -124,9 +154,7 @@ export function EmployeeDashboard() {
             <div className="divide-y divide-jax-gray-1 dark:divide-jax-blue/10">
               {loading && <div className="p-6 text-center text-sm text-jax-gray-3">Loading…</div>}
               {!loading && topQueue.length === 0 && (
-                <div className="p-8 text-center text-sm text-jax-gray-4 dark:text-jax-gray-2">
-                  No open cases. The city is having a good day.
-                </div>
+                <div className="p-8 text-center text-sm text-jax-gray-4 dark:text-jax-gray-2">No open cases. The city is having a good day.</div>
               )}
               {topQueue.map(c => <QueueRow key={c.id} c={c} />)}
             </div>
@@ -152,26 +180,51 @@ export function EmployeeDashboard() {
           </div>
         </div>
 
+        {/* RIGHT COLUMN — fresh post-Wave-F content */}
         <div className="space-y-6">
           <OnlineAgentsCard />
-          <div className="bg-gradient-to-br from-jax-blue to-jax-navy text-jax-light rounded-lg p-5">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-jax-sky mb-2">
-              <MessageSquare className="h-3.5 w-3.5" /> Wave C preview
+
+          {/* Live activity feed */}
+          <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg overflow-hidden">
+            <div className="px-5 py-3 border-b border-jax-gray-1 dark:border-jax-blue/20">
+              <h3 className="font-semibold flex items-center gap-2"><Activity className="h-4 w-4 text-jax-blue" /> Live activity</h3>
+              <p className="text-[11px] text-jax-gray-3 mt-0.5">What's happening across the city right now.</p>
             </div>
-            <h3 className="font-semibold mb-1">Team chat — inside the case</h3>
-            <p className="text-xs text-jax-sky/90">
-              Real-time chat, @mentions, video huddles. The chat Oracle AgentWeb doesn't have.
-              Shipping next wave.
-            </p>
+            <div className="max-h-[360px] overflow-y-auto">
+              {recentActivity.length === 0 && (
+                <div className="p-5 text-xs text-jax-gray-3 italic">No recent activity.</div>
+              )}
+              <ul className="divide-y divide-jax-gray-1/60 dark:divide-jax-blue/10">
+                {recentActivity.map(a => (
+                  <li key={a.id} className="px-4 py-2.5">
+                    <Link to={`/work/cases/${a.request_id}`} className="block hover:bg-jax-blue/5 dark:hover:bg-jax-blue/10 -mx-2 px-2 py-1 rounded transition">
+                      <div className="text-xs">
+                        <span className="font-medium">{a.actor_name || 'System'}</span>
+                        <span className="text-jax-gray-3"> · {actionVerb(a.kind)}</span>
+                      </div>
+                      {a.case_subject && (
+                        <div className="text-[11px] text-jax-gray-4 dark:text-jax-gray-2 truncate mt-0.5">
+                          on <span className="font-medium">{a.case_subject}</span>
+                          {a.case_ticket && <span className="ml-1 font-mono text-jax-gray-3">{a.case_ticket}</span>}
+                        </div>
+                      )}
+                      <div className="text-[10px] text-jax-gray-3 mt-0.5">{relativeTime(a.created_at)}</div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
+          {/* Quick links to other surfaces */}
           <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg p-5">
-            <h3 className="font-semibold mb-3 flex items-center gap-2"><Activity className="h-4 w-4 text-jax-blue" /> Wave B status</h3>
+            <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm"><MapPin className="h-4 w-4 text-jax-blue" /> Quick links</h3>
             <ul className="space-y-1.5 text-sm">
-              <WaveItem label="B.1 — Live data + queue + Realtime" done />
-              <WaveItem label="B.2 — Case detail (AgentWeb killer)" />
-              <WaveItem label="B.3 — Activity feed + presence" />
-              <WaveItem label="B.4 — ⌘K fuzzy search" />
+              <QuickLink to="/transparency" icon={Eye} label="Public transparency" sub="What citizens see — no login" external />
+              <QuickLink to="/me" icon={Users} label="Citizen dashboard" sub="The portal residents use" />
+              <QuickLink to="/me/intake" icon={Sparkles} label="AI intake demo" sub="Plain-English new request flow" />
+              <QuickLink to="/work/chat" icon={MessageSquare} label="Team chat" sub="13 channels, real-time" />
+              <QuickLink to="/admin" icon={Activity} label="Liftori control panel" sub="Internal tenant view" />
             </ul>
           </div>
         </div>
@@ -226,12 +279,36 @@ function Stat({ icon: Icon, label, value, tone, loading }: { icon: React.Compone
   )
 }
 
-function WaveItem({ label, done }: { label: string; done?: boolean }) {
+function QuickLink({ to, icon: Icon, label, sub, external }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; sub: string; external?: boolean }) {
   return (
-    <li className="flex items-center gap-2">
-      <span className={`inline-block h-1.5 w-1.5 rounded-full ${done ? 'bg-jax-success' : 'bg-jax-gray-2'}`} />
-      <span className={done ? 'text-jax-gray-4 dark:text-jax-gray-2' : ''}>{label}</span>
-      {done && <span className="text-xs text-jax-success ml-auto font-semibold">✓</span>}
+    <li>
+      <Link to={to} className="flex items-center gap-2 p-2 -mx-2 rounded hover:bg-jax-blue/5 dark:hover:bg-jax-blue/10 transition">
+        <Icon className="h-4 w-4 text-jax-blue shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="font-medium truncate flex items-center gap-1">
+            {label}
+            {external && <span className="text-[9px] uppercase tracking-wider text-jax-gray-3 ml-1">public</span>}
+          </div>
+          <div className="text-[10px] text-jax-gray-3 truncate">{sub}</div>
+        </div>
+        <ArrowRight className="h-3 w-3 text-jax-gray-3 shrink-0" />
+      </Link>
     </li>
   )
+}
+
+function actionVerb(kind: string): string {
+  switch (kind) {
+    case 'created':            return 'created a case'
+    case 'status_changed':     return 'changed status'
+    case 'priority_changed':   return 'changed priority'
+    case 'assigned':           return 'assigned a case'
+    case 'unassigned':         return 'unassigned a case'
+    case 'department_changed': return 'routed a case'
+    case 'commented':          return 'added a comment'
+    case 'video_started':      return 'started a video huddle'
+    case 'ai_suggested':       return 'received an AI suggestion'
+    case 'ai_applied':         return 'applied an AI suggestion'
+    default:                   return kind.replace('_', ' ')
+  }
 }
