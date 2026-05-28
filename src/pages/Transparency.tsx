@@ -7,6 +7,7 @@ import {
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { relativeTime, statusTone } from '../lib/types'
+import { useT } from '../lib/i18n'
 
 interface PublicCase {
   id: string
@@ -39,6 +40,7 @@ interface DeptStat {
 }
 
 export function Transparency() {
+  const t = useT()
   const [cases, setCases] = useState<PublicCase[]>([])
   const [stats, setStats] = useState<DeptStat[]>([])
   const [loading, setLoading] = useState(true)
@@ -74,14 +76,13 @@ export function Transparency() {
       <section className="bg-gradient-to-br from-jax-navy via-jax-navy-deep to-jax-ink text-jax-light">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-jax-blue/20 border border-jax-blue/40 text-xs uppercase tracking-widest mb-4">
-            <span className="h-2 w-2 rounded-full bg-jax-success animate-pulse" /> Live · updated in real time
+            <span className="h-2 w-2 rounded-full bg-jax-success animate-pulse" /> {t('trans.liveBadge')}
           </div>
           <h1 className="text-3xl sm:text-5xl font-bold leading-tight mb-3">
-            City of Jacksonville — <span className="text-jax-gold">Service Transparency</span>
+            {t('trans.heroTitle1')} <span className="text-jax-gold">{t('trans.heroTitle2')}</span>
           </h1>
           <p className="text-lg text-jax-sky/90 max-w-2xl">
-            Every public service request, every department, every status — updated as it changes.
-            No login required.
+            {t('trans.heroBody')}
           </p>
         </div>
       </section>
@@ -89,10 +90,10 @@ export function Transparency() {
       {/* Stat strip */}
       <section className="max-w-7xl mx-auto px-6 -mt-6 mb-8">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard icon={Inbox}         tone="blue"     label="Open"           value={totalOpen}      sub={`${urgentOpen.length} urgent`} />
-          <StatCard icon={Clock}         tone="warn"     label="Active today"   value={openCases.filter(c => Date.now() - new Date(c.created_at).getTime() < 86_400_000).length} sub="new in last 24h" />
-          <StatCard icon={CheckCircle}   tone="success"  label="Resolved"       value={totalResolved} sub="cases" />
-          <StatCard icon={AlertTriangle} tone="danger"   label="Urgent / emergency" value={totalUrgent} sub="active" />
+          <StatCard icon={Inbox}         tone="blue"     label={t('trans.statOpen')}     value={totalOpen}      sub={`${urgentOpen.length} ${t('trans.statOpenSub')}`} />
+          <StatCard icon={Clock}         tone="warn"     label={t('trans.statActive')}   value={openCases.filter(c => Date.now() - new Date(c.created_at).getTime() < 86_400_000).length} sub={t('trans.statActiveSub')} />
+          <StatCard icon={CheckCircle}   tone="success"  label={t('trans.statResolved')} value={totalResolved} sub={t('trans.statResolvedSub')} />
+          <StatCard icon={AlertTriangle} tone="danger"   label={t('trans.statUrgent')}   value={totalUrgent} sub={t('trans.statUrgentSub')} />
         </div>
       </section>
 
@@ -100,18 +101,18 @@ export function Transparency() {
       <section className="max-w-7xl mx-auto px-6 mb-8">
         <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg overflow-hidden">
           <div className="px-5 py-3 border-b border-jax-gray-1 dark:border-jax-blue/20 flex items-center justify-between">
-            <h2 className="font-semibold flex items-center gap-2"><MapPin className="h-4 w-4 text-jax-blue" /> Active service requests</h2>
+            <h2 className="font-semibold flex items-center gap-2"><MapPin className="h-4 w-4 text-jax-blue" /> {t('trans.activeRequests')}</h2>
             <div className="text-xs text-jax-gray-4 dark:text-jax-gray-2">
-              {openCases.length} open · {urgentOpen.length} urgent · live
+              {openCases.length} {t('trans.openCount')} · {urgentOpen.length} {t('trans.urgentCount')}
             </div>
           </div>
-          <TransparencyMap cases={openCases} height="420px" />
+          <TransparencyMap cases={openCases} height="420px" legendLabel={t('trans.legendPriority')} />
         </div>
       </section>
 
       {/* Department breakdown */}
       <section className="max-w-7xl mx-auto px-6 mb-8">
-        <h2 className="font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4 text-jax-blue" /> By department</h2>
+        <h2 className="font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4 text-jax-blue" /> {t('trans.byDepartment')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {stats.map(d => (
             <div key={d.id} className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg p-4">
@@ -122,15 +123,15 @@ export function Transparency() {
               <div className="grid grid-cols-3 gap-1 text-center">
                 <div>
                   <div className="text-lg font-bold text-jax-blue">{d.open_count}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-jax-gray-3">Open</div>
+                  <div className="text-[10px] uppercase tracking-wider text-jax-gray-3">{t('trans.statOpen')}</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-jax-warn">{d.urgent_open}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-jax-gray-3">Urgent</div>
+                  <div className="text-[10px] uppercase tracking-wider text-jax-gray-3">{t('priority.urgent')}</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-jax-success">{d.resolved_count + d.closed_count}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-jax-gray-3">Resolved</div>
+                  <div className="text-[10px] uppercase tracking-wider text-jax-gray-3">{t('trans.statResolved')}</div>
                 </div>
               </div>
             </div>
@@ -140,11 +141,11 @@ export function Transparency() {
 
       {/* Recent resolved */}
       <section className="max-w-7xl mx-auto px-6 mb-12">
-        <h2 className="font-semibold mb-3 flex items-center gap-2"><CheckCircle className="h-4 w-4 text-jax-success" /> Recently resolved</h2>
+        <h2 className="font-semibold mb-3 flex items-center gap-2"><CheckCircle className="h-4 w-4 text-jax-success" /> {t('trans.recentlyResolved')}</h2>
         <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg divide-y divide-jax-gray-1 dark:divide-jax-blue/10">
-          {loading && <div className="p-6 text-center text-sm text-jax-gray-3">Loading…</div>}
+          {loading && <div className="p-6 text-center text-sm text-jax-gray-3">{t('citizen.loading')}</div>}
           {!loading && resolved.length === 0 && (
-            <div className="p-6 text-center text-sm text-jax-gray-3 italic">No resolved cases yet to show.</div>
+            <div className="p-6 text-center text-sm text-jax-gray-3 italic">{t('trans.noResolved')}</div>
           )}
           {resolved.slice(0, 6).map(c => (
             <div key={c.id} className="px-5 py-3 flex items-center gap-3">
@@ -168,10 +169,10 @@ export function Transparency() {
       <section className="bg-jax-navy text-jax-light">
         <div className="max-w-4xl mx-auto px-6 py-8 text-center">
           <p className="text-sm text-jax-sky/80 mb-3">
-            Powered by Liftori · feeding clean data to the City's Power BI dashboards
+            {t('trans.poweredFooter')}
           </p>
           <Link to="/" className="inline-flex items-center gap-1 text-xs text-jax-gold hover:text-jax-gold/80">
-            Back to City Hall <ArrowRight className="h-3 w-3" />
+            {t('trans.backToCityHall')} <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
       </section>
@@ -192,10 +193,7 @@ function StatCard({ icon: Icon, label, value, sub, tone }: { icon: React.Compone
   )
 }
 
-/**
- * Cluster-light multi-marker map for the transparency dashboard.
- */
-function TransparencyMap({ cases, height }: { cases: PublicCase[]; height: string }) {
+function TransparencyMap({ cases, height, legendLabel }: { cases: PublicCase[]; height: string; legendLabel: string }) {
   const [containerId] = useState(() => `tmap-${Math.random().toString(36).slice(2, 9)}`)
   const pointed = useMemo(() => cases.filter(c => c.lat != null && c.lng != null), [cases])
 
@@ -208,7 +206,6 @@ function TransparencyMap({ cases, height }: { cases: PublicCase[]; height: strin
       if (!mounted) return
       const el = document.getElementById(containerId)
       if (!el || el.children.length > 0) return
-      // Center on Jacksonville
       map = L.map(el, { zoomControl: true, attributionControl: false }).setView([30.3322, -81.6557], 11)
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
@@ -221,7 +218,7 @@ function TransparencyMap({ cases, height }: { cases: PublicCase[]; height: strin
           radius: c.priority === 'urgent' || c.priority === 'emergency' ? 9 : 6,
           color: '#ffffff', weight: 1.5, fillColor: color, fillOpacity: 0.9,
         })
-        m.bindPopup(`<strong>${c.subject}</strong><br/><span style="font-family:monospace;color:#888">${c.ticket_number}</span><br/>${c.department_name || ''} · ${c.priority}`)
+        m.bindPopup(`<strong>${c.subject}</strong><br/><span style="font-family:monospace;color:#888">${c.ticket_number}</span><br/>${c.department_name || ''} - ${c.priority}`)
         m.addTo(layer)
       }
     })()
@@ -236,7 +233,7 @@ function TransparencyMap({ cases, height }: { cases: PublicCase[]; height: strin
     <div className="relative">
       <div id={containerId} style={{ height }} />
       <div className="absolute top-2 left-2 z-10 p-2 bg-white/95 dark:bg-jax-navy-deep/95 rounded shadow-sm border border-jax-gray-1 dark:border-jax-blue/20">
-        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5">Priority</div>
+        <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5">{legendLabel}</div>
         <div className="flex flex-wrap gap-2 text-[10px]">
           <LegendDot color="#7F1D1D" label="Emergency" />
           <LegendDot color="#B91C1C" label="Urgent" />

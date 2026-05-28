@@ -41,6 +41,7 @@ export interface Profile {
   re_number: string | null
   last_seen_at: string | null
   status: string | null
+  language: 'en' | 'es' | null
 }
 
 export interface Department {

@@ -8,6 +8,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../lib/useRealtime'
 import { relativeTime, statusTone } from '../lib/types'
+import { useT } from '../lib/i18n'
 
 interface ServiceRequest {
   id: string
@@ -37,6 +38,7 @@ interface NeighborhoodCase {
 
 export function CitizenHome() {
   const { profile } = useAuth()
+  const t = useT()
   const [myRequests, setMyRequests] = useState<ServiceRequest[]>([])
   const [neighborhood, setNeighborhood] = useState<NeighborhoodCase[]>([])
   const [articles, setArticles] = useState<KnowledgeArticle[]>([])
@@ -79,24 +81,24 @@ export function CitizenHome() {
   useEffect(() => { load() }, [load])
   useRealtime('service_requests', load)
 
-  const displayName = profile?.display_name || profile?.full_name || 'Resident'
+  const displayName = profile?.display_name || profile?.full_name || t('citizen.resident')
   const firstName = displayName.split(' ')[0]
-  const district = profile?.council_district ?? '—'
+  const district = profile?.council_district ?? '-'
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
       {/* Welcome + stats strip */}
       <div className="flex items-end justify-between flex-wrap gap-3 mb-6">
         <div>
-          <div className="text-xs uppercase tracking-widest text-jax-blue mb-1">Citizen dashboard</div>
-          <h1 className="text-3xl font-bold">Hi, {firstName}.</h1>
+          <div className="text-xs uppercase tracking-widest text-jax-blue mb-1">{t('citizen.dashboard')}</div>
+          <h1 className="text-3xl font-bold">{t('citizen.hi')}, {firstName}.</h1>
           <p className="text-sm text-jax-gray-4 dark:text-jax-gray-2 mt-1">
-            Everything you need from the City of Jacksonville, in one place.
+            {t('citizen.welcomeSub')}
           </p>
         </div>
         <div className="flex gap-2">
-          <Pill label="Open" value={stats.open} tone="blue" />
-          <Pill label="Resolved" value={stats.resolved} tone="success" />
+          <Pill label={t('citizen.open')} value={stats.open} tone="blue" />
+          <Pill label={t('citizen.resolved')} value={stats.resolved} tone="success" />
         </div>
       </div>
 
@@ -105,19 +107,18 @@ export function CitizenHome() {
         <div className="lg:col-span-2 relative overflow-hidden rounded-lg bg-gradient-to-br from-jax-blue via-jax-navy to-jax-navy-deep text-jax-light p-6">
           <div className="relative z-10">
             <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-jax-gold mb-3">
-              <Sparkles className="h-3.5 w-3.5" /> AI assistant
+              <Sparkles className="h-3.5 w-3.5" /> {t('citizen.aiAssistant')}
             </div>
-            <h2 className="text-2xl font-bold mb-1">Report something?</h2>
+            <h2 className="text-2xl font-bold mb-1">{t('citizen.reportSomething')}</h2>
             <p className="text-sm text-jax-sky/90 mb-5 max-w-md">
-              Tell us what's going on in plain English — pothole, missed pickup, stray animal,
-              overgrown lot. We'll route it to the right department and let you track it.
+              {t('citizen.reportBody')}
             </p>
             <div className="flex flex-wrap gap-2">
               <Link to="/me/intake" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-jax-gold text-jax-ink font-semibold hover:bg-jax-gold/90 transition">
-                Start a new request <ArrowRight className="h-4 w-4" />
+                {t('citizen.newRequest')} <ArrowRight className="h-4 w-4" />
               </Link>
               <a href="tel:9046302489" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-jax-sky/50 text-jax-light hover:bg-jax-blue/20 transition text-sm">
-                <Phone className="h-4 w-4" /> Or call 630-CITY
+                <Phone className="h-4 w-4" /> {t('citizen.orCall')}
               </a>
             </div>
           </div>
@@ -126,13 +127,13 @@ export function CitizenHome() {
 
         <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg p-5">
           <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm">
-            <MapPin className="h-4 w-4 text-jax-blue" /> Your address
+            <MapPin className="h-4 w-4 text-jax-blue" /> {t('citizen.yourAddress')}
           </h3>
           <div className="space-y-2 text-sm">
-            <Field label={profile?.street_address || 'No address set'} sub={`Jacksonville, FL ${profile?.zip ?? ''}`} />
-            <Field icon={MapPin}   label="Council district" sub={String(district)} />
-            <Field icon={Calendar} label="Evac zone"        sub={profile?.evac_zone || 'Not set'} />
-            <Field icon={Trash2}   label="Hauler"           sub={profile?.hauler || 'Not assigned'} />
+            <Field label={profile?.street_address || t('citizen.noAddress')} sub={`Jacksonville, FL ${profile?.zip ?? ''}`} />
+            <Field icon={MapPin}   label={t('citizen.councilDistrict')} sub={String(district)} />
+            <Field icon={Calendar} label={t('citizen.evacZone')}        sub={profile?.evac_zone || t('citizen.notSet')} />
+            <Field icon={Trash2}   label={t('citizen.hauler')}          sub={profile?.hauler || t('citizen.notAssigned')} />
           </div>
         </div>
       </div>
@@ -143,22 +144,22 @@ export function CitizenHome() {
         <div className="lg:col-span-2 bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-jax-gray-1 dark:border-jax-blue/20">
             <div>
-              <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-jax-blue" /> My service requests</h3>
-              <p className="text-xs text-jax-gray-4 dark:text-jax-gray-2">Live status from every department.</p>
+              <h3 className="font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-jax-blue" /> {t('citizen.myRequests')}</h3>
+              <p className="text-xs text-jax-gray-4 dark:text-jax-gray-2">{t('citizen.myRequestsSub')}</p>
             </div>
             <Link to="/me/intake" className="text-xs px-3 py-1.5 rounded-md bg-jax-blue text-jax-light hover:bg-jax-sky transition">
-              + New request
+              {t('citizen.newReqShort')}
             </Link>
           </div>
           <div className="divide-y divide-jax-gray-1 dark:divide-jax-blue/10">
-            {loading && <div className="p-6 text-center text-sm text-jax-gray-3">Loading…</div>}
+            {loading && <div className="p-6 text-center text-sm text-jax-gray-3">{t('citizen.loading')}</div>}
             {!loading && myRequests.length === 0 && (
               <div className="p-10 text-center">
                 <Sparkles className="h-10 w-10 text-jax-blue/40 mx-auto mb-3" />
-                <p className="text-sm font-medium">No requests yet</p>
-                <p className="text-xs text-jax-gray-3 mt-1 mb-3">Use the AI assistant to report your first issue.</p>
+                <p className="text-sm font-medium">{t('citizen.noneYet')}</p>
+                <p className="text-xs text-jax-gray-3 mt-1 mb-3">{t('citizen.noneYetSub')}</p>
                 <Link to="/me/intake" className="inline-flex items-center gap-1 text-xs text-jax-blue hover:text-jax-sky">
-                  Start now <ArrowRight className="h-3 w-3" />
+                  {t('citizen.startNow')} <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
             )}
@@ -183,10 +184,10 @@ export function CitizenHome() {
           {/* Neighborhood activity */}
           <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg p-5">
             <h3 className="font-semibold mb-3 text-sm flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-jax-blue" /> In your neighborhood
+              <TrendingUp className="h-4 w-4 text-jax-blue" /> {t('citizen.neighborhood')}
             </h3>
             {neighborhood.length === 0 ? (
-              <p className="text-xs text-jax-gray-3 italic">No recent activity nearby.</p>
+              <p className="text-xs text-jax-gray-3 italic">{t('citizen.neighborhoodNone')}</p>
             ) : (
               <ul className="space-y-2 text-sm">
                 {neighborhood.map(n => (
@@ -195,7 +196,7 @@ export function CitizenHome() {
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-medium truncate">{n.subject}</div>
                       <div className="text-[10px] text-jax-gray-3 truncate">
-                        {n.service_address ? n.service_address.split(',')[0] : `District ${n.council_district}`} · {relativeTime(n.created_at)}
+                        {n.service_address ? n.service_address.split(',')[0] : `${t('citizen.councilDistrict')} ${n.council_district}`} · {relativeTime(n.created_at)}
                       </div>
                     </div>
                   </li>
@@ -203,14 +204,14 @@ export function CitizenHome() {
               </ul>
             )}
             <div className="mt-3 text-[10px] text-jax-gray-3 italic">
-              Public service requests from Council District {district}.
+              {t('citizen.neighborhoodFooter1')} {district}.
             </div>
           </div>
 
           {/* Knowledge / FAQs */}
           <div className="bg-white dark:bg-jax-navy-deep/40 border border-jax-gray-1 dark:border-jax-blue/20 rounded-lg p-5">
             <h3 className="font-semibold mb-3 text-sm flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-jax-blue" /> Helpful articles
+              <BookOpen className="h-4 w-4 text-jax-blue" /> {t('citizen.helpfulArticles')}
             </h3>
             <ul className="space-y-2">
               {articles.map(a => (
@@ -228,10 +229,10 @@ export function CitizenHome() {
 
       {/* Quick action tiles */}
       <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-        <QuickTile icon={Trash2}       title="Waste &amp; Recycling" sub="Pickup, missed routes, bulk" />
-        <QuickTile icon={Recycle}      title="Illegal dumping"       sub="Send a photo + location" />
-        <QuickTile icon={MessageSquare} title="Browse FAQs"          sub={`${articles.length}+ articles on city services`} />
-        <QuickTile icon={Phone}        title="Call 630-CITY"          sub="(904) 630-2489 · Mon-Sat" href="tel:9046302489" />
+        <QuickTile icon={Trash2}        title={t('citizen.tile.waste')}    sub={t('citizen.tile.wasteSub')} />
+        <QuickTile icon={Recycle}       title={t('citizen.tile.dumping')}  sub={t('citizen.tile.dumpingSub')} />
+        <QuickTile icon={MessageSquare} title={t('citizen.tile.faqs')}     sub={`${articles.length}+ ${t('citizen.tile.faqsSub')}`} />
+        <QuickTile icon={Phone}         title={t('citizen.tile.call')}     sub={t('citizen.tile.callSub')} href="tel:9046302489" />
       </div>
     </div>
   )
