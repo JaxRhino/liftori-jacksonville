@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import {
-  ArrowRight, BookOpen, Calendar, FileText, MapPin, MessageSquare,
+  ArrowRight, BookOpen, Calendar, CreditCard, FileText, MapPin,
   Phone, Recycle, Sparkles, Trash2, TrendingUp,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
@@ -231,7 +231,7 @@ export function CitizenHome() {
       <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
         <QuickTile icon={Trash2}        title={t('citizen.tile.waste')}    sub={t('citizen.tile.wasteSub')} />
         <QuickTile icon={Recycle}       title={t('citizen.tile.dumping')}  sub={t('citizen.tile.dumpingSub')} />
-        <QuickTile icon={MessageSquare} title={t('citizen.tile.faqs')}     sub={`${articles.length}+ ${t('citizen.tile.faqsSub')}`} />
+        <QuickTile icon={CreditCard}    title={t('citizen.tile.bills')}    sub={t('citizen.tile.billsSub')} href="/me/bills" />
         <QuickTile icon={Phone}         title={t('citizen.tile.call')}     sub={t('citizen.tile.callSub')} href="tel:9046302489" />
       </div>
     </div>

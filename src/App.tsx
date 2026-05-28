@@ -5,6 +5,7 @@ import { Login } from './pages/Login'
 import { Signup } from './pages/Signup'
 import { CitizenHome } from './pages/CitizenHome'
 import { CitizenIntake } from './pages/CitizenIntake'
+import { CitizenBills } from './pages/CitizenBills'
 import { EmployeeDashboard } from './pages/EmployeeDashboard'
 import { CasesList } from './pages/CasesList'
 import { CaseDetail } from './pages/CaseDetail'
@@ -15,6 +16,7 @@ import { TasksPage } from './pages/workspace/TasksPage'
 import { EmailPage } from './pages/workspace/EmailPage'
 import { MeetPage } from './pages/workspace/MeetPage'
 import { KnowledgePage } from './pages/workspace/KnowledgePage'
+import { FinancePage } from './pages/workspace/FinancePage'
 import { SuperAdminPanel } from './pages/SuperAdminPanel'
 import { PublicLanding } from './pages/PublicLanding'
 import { Transparency } from './pages/Transparency'
@@ -58,6 +60,7 @@ export default function App() {
         <Route path="/meet/:token" element={<MeetInvite />} />
         <Route path="/me" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenHome /></RoleGate>} />
         <Route path="/me/intake" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenIntake /></RoleGate>} />
+        <Route path="/me/bills"  element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenBills /></RoleGate>} />
         <Route element={<RoleGate allow={['city_employee', 'super_admin']}><WorkspaceLayout /></RoleGate>}>
           <Route path="/work" element={<EmployeeDashboard />} />
           <Route path="/work/cases" element={<CasesList />} />
@@ -69,6 +72,7 @@ export default function App() {
           <Route path="/work/email" element={<EmailPage />} />
           <Route path="/work/meet" element={<MeetPage />} />
           <Route path="/work/knowledge" element={<KnowledgePage />} />
+          <Route path="/work/finance"   element={<FinancePage />} />
         </Route>
         <Route path="/admin" element={<RoleGate allow={['super_admin']}><SuperAdminPanel /></RoleGate>} />
         <Route path="*" element={<Navigate to="/" replace />} />

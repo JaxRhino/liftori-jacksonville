@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  Activity, BookOpen, Calendar, CheckSquare, Inbox, Mail, MessageSquare,
+  Activity, BookOpen, Calendar, CheckSquare, DollarSign, Inbox, Mail, MessageSquare,
   StickyNote, Video,
 } from 'lucide-react'
 import { useT, type StringKey } from '../lib/i18n'
@@ -23,6 +23,7 @@ const NAV: NavItem[] = [
   { to: '/work/email',    labelKey: 'nav.email',      icon: Mail },
   { to: '/work/meet',     labelKey: 'nav.meet',       icon: Video },
   { to: '/work/knowledge', labelKey: 'nav.knowledge', icon: BookOpen },
+  { to: '/work/finance',   labelKey: 'nav.finance',   icon: DollarSign, badge: 'J' },
 ]
 
 export function WorkspaceSidebar() {
