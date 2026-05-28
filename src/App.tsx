@@ -6,6 +6,7 @@ import { Signup } from './pages/Signup'
 import { CitizenHome } from './pages/CitizenHome'
 import { CitizenIntake } from './pages/CitizenIntake'
 import { CitizenBills } from './pages/CitizenBills'
+import { BillSettings } from './pages/BillSettings'
 import { EmployeeDashboard } from './pages/EmployeeDashboard'
 import { CasesList } from './pages/CasesList'
 import { CaseDetail } from './pages/CaseDetail'
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/me" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenHome /></RoleGate>} />
         <Route path="/me/intake" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenIntake /></RoleGate>} />
         <Route path="/me/bills"  element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><CitizenBills /></RoleGate>} />
+        <Route path="/me/bills/settings" element={<RoleGate allow={['citizen', 'city_employee', 'super_admin']}><BillSettings /></RoleGate>} />
         <Route element={<RoleGate allow={['city_employee', 'super_admin']}><WorkspaceLayout /></RoleGate>}>
           <Route path="/work" element={<EmployeeDashboard />} />
           <Route path="/work/cases" element={<CasesList />} />

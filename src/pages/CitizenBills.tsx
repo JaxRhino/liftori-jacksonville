@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  AlertTriangle, ArrowLeft, ArrowRight, CheckCircle, ChevronRight, Clock,
-  CreditCard, FileText, Filter, Loader2, MapPin, Receipt, Sparkles,
+  AlertTriangle, ArrowLeft, ArrowRight, Bell, CheckCircle, ChevronRight, Clock,
+  CreditCard, FileText, Filter, Loader2, MapPin, Receipt, Settings as SettingsIcon, Sparkles, Zap,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
@@ -29,15 +29,21 @@ export function CitizenBills() {
   const [paying, setPaying] = useState<CitizenBill[] | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
 
+  const [autopayKinds, setAutopayKinds] = useState<Set<string>>(new Set())
+  const [reminderKinds, setReminderKinds] = useState<Set<string>>(new Set())
+
   const load = useCallback(async () => {
     if (!user) return
-    const { data } = await supabase
-      .from('citizen_bills')
-      .select('*')
-      .eq('citizen_id', user.id)
-      .order('status', { ascending: true })
-      .order('due_at', { ascending: true, nullsFirst: false })
-    setBills((data as CitizenBill[]) ?? [])
+    const [bR, aR, rR] = await Promise.all([
+      supabase.from('citizen_bills').select('*').eq('citizen_id', user.id)
+        .order('status', { ascending: true }).order('due_at', { ascending: true, nullsFirst: false }),
+      supabase.from('autopay_rules').select('kind, enabled').eq('citizen_id', user.id).eq('enabled', true),
+      supabase.from('reminder_subscriptions').select('kind, email_enabled, sms_enabled').eq('citizen_id', user.id),
+    ])
+    setBills((bR.data as CitizenBill[]) ?? [])
+    setAutopayKinds(new Set(((aR.data as Array<{ kind: string }>) ?? []).map(r => r.kind)))
+    setReminderKinds(new Set(((rR.data as Array<{ kind: string; email_enabled: boolean; sms_enabled: boolean }>) ?? [])
+      .filter(r => r.email_enabled || r.sms_enabled).map(r => r.kind)))
     setLoading(false)
   }, [user])
 
@@ -69,10 +75,18 @@ export function CitizenBills() {
         <Link to="/me" className="inline-flex items-center gap-1 text-sm text-jax-blue hover:text-jax-sky mb-2">
           <ArrowLeft className="h-3.5 w-3.5" /> {t('intake.back')}
         </Link>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <CreditCard className="h-7 w-7 text-jax-blue" /> {t('bills.title')}
-        </h1>
-        <p className="text-sm text-jax-gray-4 dark:text-jax-gray-2 mt-1">{t('bills.subtitle')}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <CreditCard className="h-7 w-7 text-jax-blue" /> {t('bills.title')}
+            </h1>
+            <p className="text-sm text-jax-gray-4 dark:text-jax-gray-2 mt-1">{t('bills.subtitle')}</p>
+          </div>
+          <Link to="/me/bills/settings"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-jax-gray-2 dark:border-jax-blue/30 hover:bg-jax-blue/5 transition text-xs font-medium">
+            <SettingsIcon className="h-3.5 w-3.5" /> {t('bills.settings')}
+          </Link>
+        </div>
       </div>
 
       {/* Hero — total owed */}
@@ -169,6 +183,16 @@ export function CitizenBills() {
                           {t(billStatusKey(b.status))}
                         </span>
                         <span className="text-[11px] font-mono text-jax-gray-3">{b.ticket_number}</span>
+                        {autopayKinds.has(b.kind) && (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-jax-success/15 text-jax-success inline-flex items-center gap-0.5">
+                            <Zap className="h-2.5 w-2.5" /> autopay
+                          </span>
+                        )}
+                        {reminderKinds.has(b.kind) && (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-jax-blue/15 text-jax-blue inline-flex items-center gap-0.5">
+                            <Bell className="h-2.5 w-2.5" /> reminder
+                          </span>
+                        )}
                       </div>
                       <div className="font-semibold text-[15px] mt-0.5 leading-snug">{b.subject}</div>
                       <div className="text-[11px] text-jax-gray-4 dark:text-jax-gray-2 mt-0.5 flex items-center gap-2 flex-wrap">

@@ -262,6 +262,31 @@ export const STRINGS = {
   'citizen.tile.bills':          { en: 'My bills',                       es: 'Mis facturas' },
   'citizen.tile.billsSub':       { en: 'Pay everything in one place',    es: 'Paga todo en un solo lugar' },
 
+  // ---- CityPay autopay + reminders (Wave K) ----
+  'bills.settings':              { en: 'Settings',                       es: 'Configuracion' },
+  'settings.title':              { en: 'Bill settings',                  es: 'Configuracion de facturas' },
+  'settings.subtitle':           { en: 'Autopay and reminders, per bill type.', es: 'Autopago y recordatorios, por tipo de factura.' },
+  'settings.autopayHeader':      { en: 'Autopay',                        es: 'Autopago' },
+  'settings.autopaySub':         { en: 'When a new bill arrives, charge it automatically before the due date.', es: 'Cuando llegue una nueva factura, cobrala automaticamente antes de la fecha de vencimiento.' },
+  'settings.remindersHeader':    { en: 'Reminders',                      es: 'Recordatorios' },
+  'settings.remindersSub':       { en: 'Tell us how and how early to notify you about upcoming bills.', es: 'Dinos como y con cuanta anticipacion notificarte sobre facturas proximas.' },
+  'settings.enabled':            { en: 'Enabled',                        es: 'Activado' },
+  'settings.disabled':           { en: 'Disabled',                       es: 'Desactivado' },
+  'settings.daysBeforeDue':      { en: 'Days before due',                es: 'Dias antes del vencimiento' },
+  'settings.method':             { en: 'Payment method',                 es: 'Metodo de pago' },
+  'settings.pickMethod':         { en: 'Pick a card',                    es: 'Elige una tarjeta' },
+  'settings.email':              { en: 'Email',                          es: 'Correo' },
+  'settings.sms':                { en: 'SMS',                            es: 'SMS' },
+  'settings.savedToast':         { en: 'Saved',                          es: 'Guardado' },
+  'settings.kindHint':           { en: 'No rule yet — it will use city defaults.', es: 'Aun sin regla — usara los predeterminados de la ciudad.' },
+  'settings.activeOnly':         { en: 'Only show kinds I have or have had bills for', es: 'Solo mostrar tipos para los que tengo facturas' },
+  'settings.allKinds':           { en: 'Show all kinds',                 es: 'Mostrar todos los tipos' },
+  'settings.addMethod':          { en: 'Add a payment method',           es: 'Agregar un metodo de pago' },
+  'settings.noMethods':          { en: 'No saved payment methods yet. Pay a bill once and the card will be saved here.', es: 'Aun no hay metodos de pago guardados. Paga una factura una vez y la tarjeta se guardara aqui.' },
+  'settings.autopayChip':        { en: 'autopay',                        es: 'autopago' },
+  'settings.reminderChip':       { en: 'reminder',                       es: 'recordatorio' },
+  'settings.backToBills':        { en: 'Back to bills',                  es: 'Volver a facturas' },
+
 } as const
 
 export type StringKey = keyof typeof STRINGS
