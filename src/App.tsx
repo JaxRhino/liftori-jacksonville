@@ -14,6 +14,7 @@ import { NotesPage } from './pages/workspace/NotesPage'
 import { TasksPage } from './pages/workspace/TasksPage'
 import { EmailPage } from './pages/workspace/EmailPage'
 import { MeetPage } from './pages/workspace/MeetPage'
+import { KnowledgePage } from './pages/workspace/KnowledgePage'
 import { SuperAdminPanel } from './pages/SuperAdminPanel'
 import { PublicLanding } from './pages/PublicLanding'
 import { Transparency } from './pages/Transparency'
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="/work/tasks" element={<TasksPage />} />
           <Route path="/work/email" element={<EmailPage />} />
           <Route path="/work/meet" element={<MeetPage />} />
+          <Route path="/work/knowledge" element={<KnowledgePage />} />
         </Route>
         <Route path="/admin" element={<RoleGate allow={['super_admin']}><SuperAdminPanel /></RoleGate>} />
         <Route path="*" element={<Navigate to="/" replace />} />

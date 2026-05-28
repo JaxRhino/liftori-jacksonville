@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import {
-  Activity, Calendar, CheckSquare, Inbox, Mail, MessageSquare,
+  Activity, BookOpen, Calendar, CheckSquare, Inbox, Mail, MessageSquare,
   StickyNote, Video,
 } from 'lucide-react'
 
@@ -16,11 +16,12 @@ const NAV: NavItem[] = [
   { to: '/work',          label: 'Dashboard',  icon: Activity,       end: true },
   { to: '/work/cases',    label: 'Cases',      icon: Inbox },
   { to: '/work/chat',     label: 'Team chat',  icon: MessageSquare },
-  { to: '/work/calendar', label: 'Calendar',   icon: Calendar,    badge: 'G.2' },
-  { to: '/work/notes',    label: 'Notes',      icon: StickyNote,  badge: 'G.3' },
-  { to: '/work/tasks',    label: 'Tasks',      icon: CheckSquare, badge: 'G.4' },
-  { to: '/work/email',    label: 'Email',      icon: Mail,        badge: 'G.5' },
-  { to: '/work/meet',     label: 'Meet',       icon: Video,       badge: 'G.6' },
+  { to: '/work/calendar', label: 'Calendar',   icon: Calendar },
+  { to: '/work/notes',    label: 'Notes',      icon: StickyNote },
+  { to: '/work/tasks',    label: 'Tasks',      icon: CheckSquare },
+  { to: '/work/email',    label: 'Email',      icon: Mail },
+  { to: '/work/meet',     label: 'Meet',       icon: Video },
+  { to: '/work/knowledge', label: 'Knowledge', icon: BookOpen },
 ]
 
 export function WorkspaceSidebar() {
